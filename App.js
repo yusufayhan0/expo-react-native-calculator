@@ -6,97 +6,157 @@ const { width, height } = Dimensions.get("window");
 
 export default function App() {
   const [number, setNumber] = useState("")
-  const [newNumber, setNewNumber] = useState(true)
-  const [tempPercent, setTempPercent] = useState("")
-  const [tempNegative, setTempNegative] = useState("")
-
+  const [isNumber, setIsNumber] = useState()
+  const [fonsizeValue, setfonsizeValue] = useState(80)
   useEffect(() => {
-    if (tempPercent.length !== 0)
-      console.log("iiiiiiiiiiiiiiii", tempPercent)
-  }, [tempPercent])
-
-
-  useEffect(() => {
-    if (number.length !== 0)
-      console.log("number : ", number)
+    if (number.length > 9) {
+      setfonsizeValue(45)
+    }
+    else if (number.length > 6) {
+      setfonsizeValue(60)
+    }
+    else {
+      setfonsizeValue(80)
+    }
+    console.log("number : ", number)
+    //isNaN() sayı gelirse false döner
   }, [number])
 
-  const changeNumber = (numb) => {
-    if (number !== "") {
-      if (newNumber) {//eşittire basılmamış
-        if (isNaN(numb) && isNaN(number[number.length - 1])) {//gelen değer sayı değil ise ve son karakter sayı değil ise
-          if(numb === "-"){//son karakter işlem ise ve gelen değer eksi ise ucuna ekler
-            setNumber(value => "" + value + numb)
-          }
-          else{
-            setNumber(value => "" + value.slice(0, value.length - 1) + numb)
-          }
+  useEffect(() => {
+    setIsNumber(false)
+  }, [])
+
+  //console.log("aaaaa:")
+
+  const changeNumber = (newNumb) => {
+    let length = number.length;
+    let endNumber = number[number.length - 1]
+    let twoEndNumber = number[number.length - 2]
+    if (number.length < 55) {
+      if (isNumber && !isNaN(newNumb)) {
+        setNumber("" + newNumb)
+        setIsNumber(false)
+        return
+      }
+      if (number === "0") {
+        setNumber("" + newNumb)
+      }
+      else if ((number === "" && isNaN(newNumb)) || (number === "-" && isNaN(newNumb))) {
+        if (newNumb === "-") {
+          setNumber("-")
         }
-        else {//gelen değerleri uc uca ekler
-          setNumber(value => "" + value + numb)
+        else {
+          setNumber("")
         }
       }
       else {
-        if (!isNaN(numb)) {//eşittirden sonra eğer sayı gelirse ekrandaki sayıyı siler yeni gönderileni basar
-          setNumber("" + numb)
+        if (isNaN(endNumber) && isNaN(newNumb)) {
+          if (newNumb === ".") {
+            setNumber(value => "" + value)
+          }
+          else if (isNaN(twoEndNumber) && isNaN(endNumber) && isNaN(newNumb)) {
+            if (newNumb === "-") {
+              setNumber(value => "" + value.slice(0, length - 1) + newNumb)
+            }
+            else {
+              setNumber(value => "" + value.slice(0, length - 2) + newNumb)
+            }
+          }
+          else {
+            if (endNumber !== "-" && newNumb === "-") {
+              if (endNumber !== "+") {
+                setNumber(value => "" + value + newNumb)
+              }
+              else {
+                setNumber(value => "" + value.slice(0, length - 1) + newNumb)
+              }
+            }
+            else {
+              setNumber(value => "" + value.slice(0, length - 1) + newNumb)
+            }
+          }
         }
-        else {//eşittirden sonra işlem karakterleri gelirse ucuna ekler
-          setNumber(value => "" + value + numb)
+        else {
+          if (newNumb === ".") {
+            let i = length - 1
+            let isBla = false
+            while (i >= 0) {
+              if (isNaN(number[i])) {
+                if (number[i] === ".") {
+                  isBla = true
+                }
+                break
+              }
+              i--
+            }
+            if (!isBla) {
+              setNumber(value => "" + value + newNumb)
+            }
+          }
+          else {
+            setNumber(value => "" + value + newNumb)
+          }
         }
       }
     }
-    else {//ilk değer sıfıra
-
-      if (numb === ".")
-        setNumber("0" + numb)
-      else
-        if (isNaN(numb)) {
-          if (numb === "-")
-            setNumber(value => "" + value + numb)
-        }
-        else {
-          setNumber("" + numb)
-        }
-
-
-    }
-
-
-
-
-    setNewNumber(true)
+    
+    setIsNumber(false)
   }
 
 
-  const sonucGoster = () => {
-    setNumber(
-      eval(
-        number === ""
-          ? "0"
-          : isNaN(number[number.length - 1])
-            ? number.slice(0, number.length - 1)
-            : number
-      )
-    )
+  const sonucFilter = (number) => {
+    if (number === "" || number === "0") {
+      return "0"
+    }
+    else {
+      if (isNaN(number[number.length - 1]) && number[number.length - 1] !== "%") {
+        return number.slice(0, number.length - 1)
+      }
+      else {
+        if(number[number.length - 1] !== "%"){
+          return number.replace(/%/g, "*1/100*")
+        }
+        else{
+          return number.replace(/%/g, "*1/100")
+        }
+      }
+    }
+  }
 
-    setNewNumber(false)
+  const del = () => {
+    setNumber(value => "" + value.slice(0, value.length - 1))
+  }
+
+  const sonucGoster = () => {
+    
+    setIsNumber(true)
+    try {
+      setNumber(
+        String(eval(
+          sonucFilter(number)
+        ))
+      )
+    } catch (error) {
+      setNumber("Error")
+      setIsNumber(true)
+    }
+    
   }
 
   const sifirla = () => {
     setNumber("")
-    setNewNumber(true)
   }
 
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar backgroundColor="white" />
       <View style={styles.inpusView}>
-        <Text style={{ fontSize: 80, color: "white", paddingRight: 40, }}>{number}</Text>
+        <Text style={{ fontSize: fonsizeValue, color: "white", paddingRight: 40, }}>{number}</Text>
       </View>
       <View styles={styles.buttonsViewContainer}>
         <View style={styles.buttonsView}>
           <TouchableOpacity onPress={() => sifirla()}><View style={styles.buttonsGray}><Text style={styles.buttonText}>AC</Text></View></TouchableOpacity>
-          <View style={styles.buttonsGray}><Text style={styles.buttonText}>+/-</Text></View>
+          <TouchableOpacity onPress={() => del()}><View style={styles.buttonsGray}><Text style={styles.buttonText}>Del</Text></View></TouchableOpacity>
           <TouchableOpacity onPress={() => changeNumber("%")}><View style={styles.buttonsGray}><Text style={styles.buttonText}>%</Text></View></TouchableOpacity>
           <TouchableOpacity onPress={() => changeNumber("/")}><View style={[styles.buttonsGray, { backgroundColor: "orange" }]}><Text style={[styles.buttonText, { color: "white" }]}>÷</Text></View></TouchableOpacity>
         </View>
