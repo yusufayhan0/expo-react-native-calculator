@@ -1,3 +1,3 @@
 # expo-react-native-calculator
 
-<img src="https://github.com/yusufayhan0/expo-react-native-calculator/blob/main/gfff.gif" />
+<center> <img src="https://github.com/yusufayhan0/expo-react-native-calculator/blob/main/gfff.gif" /></center> 
